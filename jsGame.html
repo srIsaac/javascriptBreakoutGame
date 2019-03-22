@@ -8,7 +8,7 @@
 			margin: 0;
 		}
 		canvas{
-			background-color: gray;
+			background-color: #D3D3D3;
 			display: block;
 			margin: 0 auto;
 		}
@@ -22,17 +22,21 @@
 		var ctx = canvas.getContext("2d"); //Usado para desenhar no canvas
 
 		var x = canvas.width / 2; //Valor de x do arc na funcao draw()
-		var y = canvas.height - 30; //Valor de y na funcao draw()
+		var y = canvas.height - 20; //Valor de y na funcao draw()
 		var raioCirculo = 4; //Valor do raio do circulo na funcao draw()
 		var dx = 2;
 		var dy = -2;
 
 		var batedorHeight = 8; //Altura do batedor
 		var batedorWidth = 0; //Largura do batedor vai ser setada quando soubermos a dificuldade
-		var batedorX = (canvas.width - batedorWidth) / 2;
+		var batedorX = 0;
 
 		var dirPressionada = false;
 		var esqPressionada = false;
+		var shiftEsqPressionada = false;
+		var shiftDirPressionada = false;
+		var spcPressionada = false;
+		var spcJaFoiPressionado = false;
 
 		//variveis dos tijolos
 		var tijoloRowCount = 5; //Quantidade de tijolos por linha
@@ -40,22 +44,25 @@
 		var tijoloWidth = 32; //Largura de um tijolo
 		var tijoloHeight = 16; //Altura de um tijolo
 		var tijoloPadding = 10; //Espaço entre tijolos
-		var tijoloOffsetTop = 30; //Espaço em relação ao topo do canvas
+		var tijoloOffsetTop = 35; //Espaço em relação ao topo do canvas
 		var tijoloOffestLeft = 30; //Espaço em relação a esquerda do canvas
 
 		var pontos = 0;
 		var vidas = 0; //Será setada quando soubermos da dificuldade
-		var dificuldade = 1; //Seta a dificuldade do game (1: Facil, 2: Normal, 3: Dificil)
+		var dificuldade = 3; //Seta a dificuldade do game (1: Facil, 2: Normal, 3: Dificil)
 		var interval;
+		console.log(dificuldade);
 
 		if(dificuldade == 1){
 			batedorWidth = 150;
+			batedorX = (canvas.width - batedorWidth) / 2; //Coloca o batedor no centro do canvas
 			vidas = 5;
 			tijoloColumnCount = 5; tijoloWidth = 75;
 			tijoloRowCount = 4; tijoloHeight = 20;
 		}
 		else if(dificuldade == 2){
 			batedorWidth = 110;
+			batedorX = (canvas.width - batedorWidth) / 2; //Coloca o batedor no centro do canvas
 			vidas = 4;
 			tijoloOffestLeft = 24; //Centralizar o bloco de tijolos
 			tijoloColumnCount = 8; tijoloWidth = 45;
@@ -63,6 +70,7 @@
 		}
 		else if(dificuldade == 3){
 			batedorWidth = 80;
+			batedorX = (canvas.width - batedorWidth) / 2; //Coloca o batedor no centro do canvas
 			vidas = 3;
 			tijoloOffestLeft = 20; //Centralizar o bloco de tijolos
 			tijoloColumnCount = 10; tijoloWidth = 35;
@@ -77,29 +85,72 @@
 			}
 		}
 
+		//Adiciona sombra a todos os elementos graficos dentro do canvas.
+		ctx.shadowBlur = 1;
+		ctx.shadowColor = "black";
+		ctx.shadowOffs = 0;
+
 		document.addEventListener("keydown", keyDownHandler, false); //Se o user pressionar alguma key do teclado sse codigo entra na funcao keyDownHandler()
 		document.addEventListener("keyup", keyUpHandler, false); //Se o user soltar alguma key do teclado sse codigo entra na funcao keyUpHandler()
 
 		function drawDificuldade(){
-			ctx.font = "16px Arial"
-			ctx.fillStyle = "#FFFFFF";
-			if(dificuldade == 1)
+			ctx.font = "bold 16px Arial"
+			
+			if(dificuldade == 1){
+				ctx.strokeStyle = "black";
+    			ctx.lineWidth = 2;
+    			ctx.strokeText("Dificuldade: Fácil", (canvas.width / 2) - 55 , 20);
+    			ctx.fillStyle = "green";
 				ctx.fillText("Dificuldade: Fácil", (canvas.width / 2) - 55 , 20);
-			if(dificuldade == 2)
+			}
+			else if(dificuldade == 2){
+				ctx.strokeStyle = "black";
+    			ctx.lineWidth = 2;
+    			ctx.strokeText("Dificuldade: Normal", (canvas.width / 2) - 63 , 20);
+    			ctx.fillStyle = "yellow";
 				ctx.fillText("Dificuldade: Normal", (canvas.width / 2) - 63 , 20);
-			else if(dificuldade == 3)
+			}
+			else if(dificuldade == 3){
+				ctx.strokeStyle = "black";
+    			ctx.lineWidth = 2;
+    			ctx.strokeText("Dificuldade: Dificil", (canvas.width / 2) - 56 , 20);
+    			ctx.fillStyle = "red";
 				ctx.fillText("Dificuldade: Dificil", (canvas.width / 2) - 56 , 20);
+			}
 		}
 
 		function drawVidas(){
-			ctx.font = "16px Arial";
-			ctx.fillStyle = "#FFFFFF"
-			ctx.fillText("Vidas: " + vidas, canvas.width - 76, 20);
+			ctx.font = "bold 16px Arial";
+			if(vidas >= 3){
+				ctx.strokeStyle = "black";
+    			ctx.lineWidth = 2;
+    			ctx.strokeText("Vidas: " + vidas, canvas.width - 76, 20);
+    			ctx.fillStyle = "green";
+    			ctx.fillText("Vidas: " + vidas, canvas.width - 76, 20);	
+				
+			}
+			else if(vidas == 2){
+				ctx.strokeStyle = "black";
+    			ctx.lineWidth = 2;
+    			ctx.strokeText("Vidas: " + vidas, canvas.width - 76, 20);
+    			ctx.fillStyle = "yellow";
+    			ctx.fillText("Vidas: " + vidas, canvas.width - 76, 20);
+			}
+			else if(vidas == 1){
+				ctx.strokeStyle = "black";
+    			ctx.lineWidth = 2;
+    			ctx.strokeText("Vidas: " + vidas, canvas.width - 76, 20);
+    			ctx.fillStyle = "red";
+    			ctx.fillText("Vidas: " + vidas, canvas.width - 76, 20);
+			}
 		}
 
 		function drawPontos(){ //Funcao que desenha o texto de pontos na tela
-			ctx.font = "16px Arial";
-			ctx.fillStyle = "#FFFFFF";
+			ctx.font = "bold 16px Arial";
+			ctx.strokeStyle = "black";
+    		ctx.lineWidth = 2;
+    		ctx.strokeText("Pontuação: " + pontos, 8, 20);
+    		ctx.fillStyle = "white";
 			ctx.fillText("Pontuação: " + pontos, 8, 20); //(texto, posX, posY)
 		}
 
@@ -114,6 +165,8 @@
 							pontos += 10;
 							if(pontos == (tijoloColumnCount * tijoloRowCount) * 10){
 								alert("Parabéns, você ganhou!");
+								dificuldade += 1;
+								console.log(dificuldade);
 								document.location.reload();
 								clearInterval(interval);
 							}
@@ -150,6 +203,9 @@
 			else if(e.key == "Left" || e.key == "ArrowLeft"){
 				esqPressionada = true;
 			}
+			else if(e.keyCode == "32"){
+				spcPressionada = true;
+			}
 		}
 
 		//Aqui é o codigo para saber se o user soltou a tecla direita/esquerda. Se ele soltar alguma delas a var respectiva será falses. O parametro 'e' é um parametro de evento.
@@ -160,6 +216,8 @@
 			else if(e.key == "Left" || e.key == "ArrowLeft"){
 				esqPressionada = false;
 			}
+			//Nao colocamos o keyup do space senao o jogo iria travar a bolinha e por enquanto nao encontrei uma outra forma para
+			//nao fazer a bolinha parar.
 		}
 
 		//Criação do batedor
@@ -176,7 +234,7 @@
 		function drawCirculo(){
 			ctx.beginPath();
 			ctx.arc(x, y, raioCirculo, 0, Math.PI*2);
-			ctx.strokeStyle = "black"
+			ctx.strokeStyle = "black";
 			ctx.fillStyle= "black";
 			ctx.fill();
 			ctx.stroke();
@@ -186,20 +244,27 @@
 				dy = -dy; //Inverte a trajetoria do circulo
 			}
 			else if(y + dy > (canvas.height - batedorHeight) - raioCirculo){ //Se o circulo bater na parede inferior do canvas o jogo termina mostrando uma alert falando 'fim de jogo' e recarrega a pag.
-				if(x > batedorX && x < batedorX + batedorWidth){
+				if(x > batedorX - 10 && x < batedorX + batedorWidth + 10 ){
 					dy = -dy;
 				} 
 				else{
 					vidas--;
 					if(!vidas){
 						raioCirculo = 10;
-						alert("Fim de Jogo!");
+						alert("Você perdeu");
 						document.location.reload();
-						clearInterval(interval); //Necessario para o chrome encerrar o jogo
+						clearInterval(interval); //Necessario para o chrome encerrar o jogo	
 					}
 					else{
-						dx =2;
-						dy = -2;
+						spcPressionada = false;
+						dx = 0;
+						dy = 0;
+						batedorX = (canvas.width - batedorWidth) / 2; //Coloca o batedor no centro do canvas
+						x = canvas.width / 2;
+						y = canvas.height - 20;
+						dx = 2;
+						dy = -2
+						draw(); 
 					}
 				}
 			}
@@ -207,6 +272,8 @@
 				dx = -dx; //Inverte a trajetoria do circulo
 			}
 		}
+
+
 		//Para fazer o movimento do circulo pela tela a cada frame atualizaremos a posição dele no canvas para passar uma 
 		//sensação de movimento.
 		function draw(){
@@ -222,15 +289,30 @@
 			drawCirculo();
 			//Desenho do nosso batedor
 			drawBatedor();
-			x += dx; //Adicionamos dx a x sempre que a funcao draw é chamada
-			y += dy; //Adicionamos dy a y20empre que a funcao draw é chamada
+
+			if(spcPressionada){
+				x += dx;
+				y += dy;
+				//x += dx; //Adicionamos dx a x sempre que a funcao draw é chamada
+				//y += dy; //Adicionamos dy a y20empre que a funcao draw é chamada	
+			}
+			
+
 
 			//Abaixo esta o codigo para fazer o batedor mover esquerda ou direita dependendo do key que o user estiver apertando, tambem colocamos o valor max/min para o batedor nao escapar do canvas adicionei o +5 e -5 pois queria que tivesse um pequeno espaco no limite do canvas entre o canvas e o batedor.
 			if(dirPressionada && batedorX < (canvas.width - batedorWidth) - 5){
 				batedorX += 5
+				if(!spcPressionada){
+					x += 5;
+				}
+				
 			}
 			else if(esqPressionada && batedorX > 0 + 5){
 				batedorX -= 5
+				if(!spcPressionada){
+					x -= 5;	
+				}
+				
 			}
 			//Adicionamos o dx e dy aos as suas respectivas letras para alterar o valor do eixo x e y do circulo no nosso canvas e
 			//com isso dar a sensação de movimento
