@@ -23,7 +23,7 @@
 
 		var x = canvas.width / 2; //Valor de x do arc na funcao draw()
 		var y = canvas.height - 30; //Valor de y na funcao draw()
-		var raioCirculo = 5; //Valor do raio do circulo na funcao draw()
+		var raioCirculo = 4; //Valor do raio do circulo na funcao draw()
 		var dx = 2;
 		var dy = -2;
 
@@ -35,30 +35,38 @@
 		var esqPressionada = false;
 
 		//variveis dos tijolos
-		var tijoloRowCount = 3; //Quantidade de tijolos por linha
-		var tijoloColumnCount = 5; //Quantidade de tijolos por coluna
-		var tijoloWidth = 75; //Largura de um tijolo
-		var tijoloHeight = 20; //Altura de um tijolo
+		var tijoloRowCount = 5; //Quantidade de tijolos por linha
+		var tijoloColumnCount = 10; //Quantidade de tijolos por coluna
+		var tijoloWidth = 32; //Largura de um tijolo
+		var tijoloHeight = 16; //Altura de um tijolo
 		var tijoloPadding = 10; //Espaço entre tijolos
 		var tijoloOffsetTop = 30; //Espaço em relação ao topo do canvas
 		var tijoloOffestLeft = 30; //Espaço em relação a esquerda do canvas
 
 		var pontos = 0;
 		var vidas = 0; //Será setada quando soubermos da dificuldade
-		var dificuldade = 3; //Seta a dificuldade do game (1: Facil, 2: Normal, 3: Dificil)
+		var dificuldade = 1; //Seta a dificuldade do game (1: Facil, 2: Normal, 3: Dificil)
 		var interval;
 
 		if(dificuldade == 1){
 			batedorWidth = 150;
 			vidas = 5;
+			tijoloColumnCount = 5; tijoloWidth = 75;
+			tijoloRowCount = 4; tijoloHeight = 20;
 		}
 		else if(dificuldade == 2){
 			batedorWidth = 110;
-			vidas = 3;
+			vidas = 4;
+			tijoloOffestLeft = 24; //Centralizar o bloco de tijolos
+			tijoloColumnCount = 8; tijoloWidth = 45;
+			tijoloRowCount = 5; tijoloHeight = 16;
 		}
 		else if(dificuldade == 3){
 			batedorWidth = 80;
-			vidas = 2;
+			vidas = 3;
+			tijoloOffestLeft = 20; //Centralizar o bloco de tijolos
+			tijoloColumnCount = 10; tijoloWidth = 35;
+			tijoloRowCount = 6; tijoloHeight = 13;
 		}
 
 		var tijolos = [];
@@ -73,7 +81,7 @@
 		document.addEventListener("keyup", keyUpHandler, false); //Se o user soltar alguma key do teclado sse codigo entra na funcao keyUpHandler()
 
 		function drawDificuldade(){
-			ctx.font = "16px Verdana"
+			ctx.font = "16px Arial"
 			ctx.fillStyle = "#FFFFFF";
 			if(dificuldade == 1)
 				ctx.fillText("Dificuldade: Fácil", (canvas.width / 2) - 55 , 20);
@@ -84,13 +92,13 @@
 		}
 
 		function drawVidas(){
-			ctx.font = "16px Verdana";
+			ctx.font = "16px Arial";
 			ctx.fillStyle = "#FFFFFF"
 			ctx.fillText("Vidas: " + vidas, canvas.width - 76, 20);
 		}
 
 		function drawPontos(){ //Funcao que desenha o texto de pontos na tela
-			ctx.font = "16px Verdana";
+			ctx.font = "16px Arial";
 			ctx.fillStyle = "#FFFFFF";
 			ctx.fillText("Pontuação: " + pontos, 8, 20); //(texto, posX, posY)
 		}
@@ -177,19 +185,20 @@
 			if(y + dy < raioCirculo){ //Faz o circulo rebater na parede de cima do meu canvas. Colocamos o raioCirculo inves de 0 pois queremos que o nosso circulo rebata da parede assim que alguma borda dela encoste na parede e não o centro dela.
 				dy = -dy; //Inverte a trajetoria do circulo
 			}
-			else if(y + dy > canvas.height - raioCirculo){ //Se o circulo bater na parede inferior do canvas o jogo termina mostrando uma alert falando 'fim de jogo' e recarrega a pag.
+			else if(y + dy > (canvas.height - batedorHeight) - raioCirculo){ //Se o circulo bater na parede inferior do canvas o jogo termina mostrando uma alert falando 'fim de jogo' e recarrega a pag.
 				if(x > batedorX && x < batedorX + batedorWidth){
-					dy = -dy
+					dy = -dy;
 				} 
 				else{
 					vidas--;
 					if(!vidas){
+						raioCirculo = 10;
 						alert("Fim de Jogo!");
 						document.location.reload();
 						clearInterval(interval); //Necessario para o chrome encerrar o jogo
 					}
 					else{
-						dx = 2;
+						dx =2;
 						dy = -2;
 					}
 				}
@@ -226,6 +235,7 @@
 			//Adicionamos o dx e dy aos as suas respectivas letras para alterar o valor do eixo x e y do circulo no nosso canvas e
 			//com isso dar a sensação de movimento
 		}
+
 		if(dificuldade == 1){
 			interval = setInterval(draw, 10); //Esse código chamará a função draw a cada 10 Milisegundos para sempre ou até parar-lo
 		}
