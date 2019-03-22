@@ -23,12 +23,12 @@
 
 		var x = canvas.width / 2; //Valor de x do arc na funcao draw()
 		var y = canvas.height - 30; //Valor de y na funcao draw()
-		var raioCirculo = 7; //Valor do raio do circulo na funcao draw()
+		var raioCirculo = 5; //Valor do raio do circulo na funcao draw()
 		var dx = 2;
 		var dy = -2;
 
 		var batedorHeight = 8; //Altura do batedor
-		var batedorWidth = 200; //Largura do batedor
+		var batedorWidth = 0; //Largura do batedor vai ser setada quando soubermos a dificuldade
 		var batedorX = (canvas.width - batedorWidth) / 2;
 
 		var dirPressionada = false;
@@ -44,8 +44,22 @@
 		var tijoloOffestLeft = 30; //Espaço em relação a esquerda do canvas
 
 		var pontos = 0;
+		var vidas = 0; //Será setada quando soubermos da dificuldade
+		var dificuldade = 3; //Seta a dificuldade do game (1: Facil, 2: Normal, 3: Dificil)
+		var interval;
 
-		var vidas = 3;
+		if(dificuldade == 1){
+			batedorWidth = 150;
+			vidas = 5;
+		}
+		else if(dificuldade == 2){
+			batedorWidth = 110;
+			vidas = 3;
+		}
+		else if(dificuldade == 3){
+			batedorWidth = 80;
+			vidas = 2;
+		}
 
 		var tijolos = [];
 		for(var i = 0; i < tijoloColumnCount; i++){
@@ -58,6 +72,17 @@
 		document.addEventListener("keydown", keyDownHandler, false); //Se o user pressionar alguma key do teclado sse codigo entra na funcao keyDownHandler()
 		document.addEventListener("keyup", keyUpHandler, false); //Se o user soltar alguma key do teclado sse codigo entra na funcao keyUpHandler()
 
+		function drawDificuldade(){
+			ctx.font = "16px Verdana"
+			ctx.fillStyle = "#FFFFFF";
+			if(dificuldade == 1)
+				ctx.fillText("Dificuldade: Fácil", (canvas.width / 2) - 55 , 20);
+			if(dificuldade == 2)
+				ctx.fillText("Dificuldade: Normal", (canvas.width / 2) - 63 , 20);
+			else if(dificuldade == 3)
+				ctx.fillText("Dificuldade: Dificil", (canvas.width / 2) - 56 , 20);
+		}
+
 		function drawVidas(){
 			ctx.font = "16px Verdana";
 			ctx.fillStyle = "#FFFFFF"
@@ -68,7 +93,6 @@
 			ctx.font = "16px Verdana";
 			ctx.fillStyle = "#FFFFFF";
 			ctx.fillText("Pontuação: " + pontos, 8, 20); //(texto, posX, posY)
-			
 		}
 
 		function deteccaoColisao(){
@@ -100,9 +124,10 @@
 						tijolos[i][j].x = tijoloX;
 						tijolos[i][j].y = tijoloY;
 						ctx.beginPath();
-						ctx.rect(tijoloX, tijoloY, tijoloWidth, tijoloHeight);
-						ctx.fillStyle = "red";
-						ctx.fill();
+						ctx.rect(tijoloX, tijoloY, tijoloWidth, tijoloHeight)
+						ctx.strokeStyle = "black";
+						//ctx.fillStyle = "red";
+						ctx.stroke();
 						ctx.closePath();
 					}
 				}
@@ -134,6 +159,8 @@
     		ctx.beginPath();
     		ctx.rect(batedorX, canvas.height - batedorHeight - 5, batedorWidth, batedorHeight);
     		ctx.fillStyle = "black";
+    		ctx.strokeStyle = "black";
+    		ctx.stroke();
     		ctx.fill();
     		ctx.closePath();
 		}	
@@ -141,8 +168,10 @@
 		function drawCirculo(){
 			ctx.beginPath();
 			ctx.arc(x, y, raioCirculo, 0, Math.PI*2);
-			ctx.fillStyle= "blue";
+			ctx.strokeStyle = "black"
+			ctx.fillStyle= "black";
 			ctx.fill();
+			ctx.stroke();
 			ctx.closePath();
 			
 			if(y + dy < raioCirculo){ //Faz o circulo rebater na parede de cima do meu canvas. Colocamos o raioCirculo inves de 0 pois queremos que o nosso circulo rebata da parede assim que alguma borda dela encoste na parede e não o centro dela.
@@ -176,6 +205,7 @@
 			//chamado, se não usarmos essa função o nosso circulo deixara todo o seu rastro para tras, os valores que são passados
 			//dentro dele são a area em que ele limpara, como queremos todo o nosso canvas colocamos o ponto de inico em 0,0 e o ponto final no nosso valor maximo de wight e height do canvas. (xTopoEsquerdo, yTopoEsquerdo, xInfDireito, yInfDireito)
 			//Desenho do nosso circulo
+			drawDificuldade();
 			drawVidas();
 			drawPontos();			
 			drawTijolos();
@@ -196,9 +226,15 @@
 			//Adicionamos o dx e dy aos as suas respectivas letras para alterar o valor do eixo x e y do circulo no nosso canvas e
 			//com isso dar a sensação de movimento
 		}
-		var interval = setInterval(draw, 5); //Esse código chamará a função draw a cada 10 Milisegundos para sempre ou até parar-lo
-
-		//This is just a test
+		if(dificuldade == 1){
+			interval = setInterval(draw, 10); //Esse código chamará a função draw a cada 10 Milisegundos para sempre ou até parar-lo
+		}
+		else if(dificuldade == 2){
+			interval = setInterval(draw, 5);
+		}
+		else if(dificuldade == 3){
+			interval = setInterval(draw, 1);
+		}
 	</script>
 </body>
 </html>
