@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Quebra Blocos - JS</title>
+	<style>
+		*{
+			padding: 0;
+			margin: 0;
+		}
+		canvas{
+			background-color: gray;
+			display: block;
+			margin: 0 auto;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="meuCanvas" width="480" height="320"></canvas> <!-- Criação do canvas, onde todo o jogo estará -->
+
+	<script>
+		var canvas = document.getElementById("meuCanvas"); //variavel canvas guarda uma referencia do canvas
+		var ctx = canvas.getContext("2d"); //Usado para desenhar no canvas
+
+		var x = canvas.width / 2; //Valor de x do arc na funcao draw()
+		var y = canvas.height - 30; //Valor de y na funcao draw()
+		var raioCirculo = 7; //Valor do raio do circulo na funcao draw()
+		var dx = 2;
+		var dy = -2;
+
+		var batedorHeight = 8; //Altura do batedor
+		var batedorWidth = 200; //Largura do batedor
+		var batedorX = (canvas.width - batedorWidth) / 2;
+
+		var dirPressionada = false;
+		var esqPressionada = false;
+
+		//variveis dos tijolos
+		var tijoloRowCount = 3; //Quantidade de tijolos por linha
+		var tijoloColumnCount = 5; //Quantidade de tijolos por coluna
+		var tijoloWidth = 75; //Largura de um tijolo
+		var tijoloHeight = 20; //Altura de um tijolo
+		var tijoloPadding = 10; //Espaço entre tijolos
+		var tijoloOffsetTop = 30; //Espaço em relação ao topo do canvas
+		var tijoloOffestLeft = 30; //Espaço em relação a esquerda do canvas
+
+		var pontos = 0;
+
+		var vidas = 3;
+
+		var tijolos = [];
+		for(var i = 0; i < tijoloColumnCount; i++){
+			tijolos[i] = [];
+			for(var j = 0; j < tijoloRowCount; j++){
+				tijolos[i][j] = { x: 0, y: 0, status: 1};
+			}
+		}
+
+		document.addEventListener("keydown", keyDownHandler, false); //Se o user pressionar alguma key do teclado sse codigo entra na funcao keyDownHandler()
+		document.addEventListener("keyup", keyUpHandler, false); //Se o user soltar alguma key do teclado sse codigo entra na funcao keyUpHandler()
+
+		function drawVidas(){
+			ctx.font = "16px Verdana";
+			ctx.fillStyle = "#FFFFFF"
+			ctx.fillText("Vidas: " + vidas, canvas.width - 76, 20);
+		}
+
+		function drawPontos(){ //Funcao que desenha o texto de pontos na tela
+			ctx.font = "16px Verdana";
+			ctx.fillStyle = "#FFFFFF";
+			ctx.fillText("Pontuação: " + pontos, 8, 20); //(texto, posX, posY)
+			
+		}
+
+		function deteccaoColisao(){
+			for(var i = 0; i < tijoloColumnCount; i++){
+				for(var j = 0; j < tijoloRowCount; j++){
+					var b = tijolos[i][j];
+					if(b.status == 1){
+						if(x > b.x && x < b.x+tijoloWidth && y > b.y && y < b.y+tijoloHeight){
+							dy = -dy;
+							b.status = 0;
+							pontos += 10;
+							if(pontos == (tijoloColumnCount * tijoloRowCount) * 10){
+								alert("Parabéns, você ganhou!");
+								document.location.reload();
+								clearInterval(interval);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		function drawTijolos(){ //Essa funcao desenha os tijolos no canvas
+			for(var i = 0; i < tijoloColumnCount; i++){
+				for(var j = 0; j < tijoloRowCount; j++){
+					if(tijolos[i][j].status == 1){
+						var tijoloX = (i*(tijoloWidth + tijoloPadding)) + tijoloOffestLeft;
+						var tijoloY = (j*(tijoloHeight + tijoloPadding)) + tijoloOffsetTop;
+						tijolos[i][j].x = tijoloX;
+						tijolos[i][j].y = tijoloY;
+						ctx.beginPath();
+						ctx.rect(tijoloX, tijoloY, tijoloWidth, tijoloHeight);
+						ctx.fillStyle = "red";
+						ctx.fill();
+						ctx.closePath();
+					}
+				}
+			}
+		}
+		
+		//Aqui é o codigo para saber se o user está pressionando a tecla direita / esquerda. Se ele estiver pressionando alguma delas a var respectiva será true. O parametro 'e' é um parametro de evento.
+		function keyDownHandler(e){
+			if(e.key == "Right" || e.key == "ArrowRight"){
+				dirPressionada = true;
+			}
+			else if(e.key == "Left" || e.key == "ArrowLeft"){
+				esqPressionada = true;
+			}
+		}
+
+		//Aqui é o codigo para saber se o user soltou a tecla direita/esquerda. Se ele soltar alguma delas a var respectiva será falses. O parametro 'e' é um parametro de evento.
+		function keyUpHandler(e){
+			if(e.key == "Right" || e.key == "ArrowRight"){
+				dirPressionada = false;
+			}
+			else if(e.key == "Left" || e.key == "ArrowLeft"){
+				esqPressionada = false;
+			}
+		}
+
+		//Criação do batedor
+		function drawBatedor() {
+    		ctx.beginPath();
+    		ctx.rect(batedorX, canvas.height - batedorHeight - 5, batedorWidth, batedorHeight);
+    		ctx.fillStyle = "black";
+    		ctx.fill();
+    		ctx.closePath();
+		}	
+		
+		function drawCirculo(){
+			ctx.beginPath();
+			ctx.arc(x, y, raioCirculo, 0, Math.PI*2);
+			ctx.fillStyle= "blue";
+			ctx.fill();
+			ctx.closePath();
+			
+			if(y + dy < raioCirculo){ //Faz o circulo rebater na parede de cima do meu canvas. Colocamos o raioCirculo inves de 0 pois queremos que o nosso circulo rebata da parede assim que alguma borda dela encoste na parede e não o centro dela.
+				dy = -dy; //Inverte a trajetoria do circulo
+			}
+			else if(y + dy > canvas.height - raioCirculo){ //Se o circulo bater na parede inferior do canvas o jogo termina mostrando uma alert falando 'fim de jogo' e recarrega a pag.
+				if(x > batedorX && x < batedorX + batedorWidth){
+					dy = -dy
+				} 
+				else{
+					vidas--;
+					if(!vidas){
+						alert("Fim de Jogo!");
+						document.location.reload();
+						clearInterval(interval); //Necessario para o chrome encerrar o jogo
+					}
+					else{
+						dx = 2;
+						dy = -2;
+					}
+				}
+			}
+			if(x + dx < raioCirculo || x + dx > canvas.width - raioCirculo){ //Faz o circulo rebater na parede esquerda||direita do meu canvas. Colocamos o raioCirculo inves de 0 pois queremos que o nosso circulo rebata da parede assim que alguma borda dela encoste na parede e não o centro dela.
+				dx = -dx; //Inverte a trajetoria do circulo
+			}
+		}
+		//Para fazer o movimento do circulo pela tela a cada frame atualizaremos a posição dele no canvas para passar uma 
+		//sensação de movimento.
+		function draw(){
+			ctx.clearRect(0, 0, canvas.width, canvas.height) //Usamos essa funcao para limpar o nosso canvas toda vez que ele é
+			//chamado, se não usarmos essa função o nosso circulo deixara todo o seu rastro para tras, os valores que são passados
+			//dentro dele são a area em que ele limpara, como queremos todo o nosso canvas colocamos o ponto de inico em 0,0 e o ponto final no nosso valor maximo de wight e height do canvas. (xTopoEsquerdo, yTopoEsquerdo, xInfDireito, yInfDireito)
+			//Desenho do nosso circulo
+			drawVidas();
+			drawPontos();			
+			drawTijolos();
+			deteccaoColisao();
+			drawCirculo();
+			//Desenho do nosso batedor
+			drawBatedor();
+			x += dx; //Adicionamos dx a x sempre que a funcao draw é chamada
+			y += dy; //Adicionamos dy a y20empre que a funcao draw é chamada
+
+			//Abaixo esta o codigo para fazer o batedor mover esquerda ou direita dependendo do key que o user estiver apertando, tambem colocamos o valor max/min para o batedor nao escapar do canvas adicionei o +5 e -5 pois queria que tivesse um pequeno espaco no limite do canvas entre o canvas e o batedor.
+			if(dirPressionada && batedorX < (canvas.width - batedorWidth) - 5){
+				batedorX += 5
+			}
+			else if(esqPressionada && batedorX > 0 + 5){
+				batedorX -= 5
+			}
+			//Adicionamos o dx e dy aos as suas respectivas letras para alterar o valor do eixo x e y do circulo no nosso canvas e
+			//com isso dar a sensação de movimento
+		}
+		var interval = setInterval(draw, 5); //Esse código chamará a função draw a cada 10 Milisegundos para sempre ou até parar-lo
+	</script>
+</body>
+</html>
