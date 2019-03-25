@@ -46,8 +46,9 @@
 
 		var pontos = 0;
 		var vidas = 0; //Será setada quando soubermos da dificuldade
-		var dificuldade = 3; //Seta a dificuldade do game (1: Facil, 2: Normal, 3: Dificil)
+		var dificuldade = 1; //Seta a dificuldade do game (1: Facil, 2: Normal, 3: Dificil)
 		var interval;
+		var estado = "menu";
 
 		if(dificuldade == 1){
 			batedorWidth = 150;
@@ -89,8 +90,48 @@
 		document.addEventListener("keydown", keyDownHandler, false); //Se o user pressionar alguma key do teclado sse codigo entra na funcao keyDownHandler()
 		document.addEventListener("keyup", keyUpHandler, false); //Se o user soltar alguma key do teclado sse codigo entra na funcao keyUpHandler()
 
+		function drawMenu(){
+			ctx.font  = "bold 30px Arial";
+			ctx.strokeStyle = "black";
+    		ctx.lineWidth = 2;
+    		ctx.strokeText("Quebra Bloco - JS", (canvas.width / 2) - 130, 100);
+    		ctx.fillStyle = "white";
+			ctx.fillText("Quebra Bloco - JS", (canvas.width / 2) - 130, 100);
+			
+			ctx.font  = "16px Arial";
+    		ctx.fillStyle = "white";
+			ctx.fillText("Pressione espaço para jogar", (canvas.width / 2) - 100, 200);
+		}
+		
+		function drawVitoria(){
+			ctx.font  = "bold 30px Arial";
+			ctx.strokeStyle = "black";
+    		ctx.lineWidth = 2;
+    		ctx.strokeText("Quebra Bloco - Ganhou", (canvas.width / 2) - 130, 100);
+    		ctx.fillStyle = "white";
+			ctx.fillText("Quebra Bloco - Ganhou", (canvas.width / 2) - 130, 100);
+			
+			ctx.font  = "16px Arial";
+    		ctx.fillStyle = "white";
+			ctx.fillText("Pressione espaço para jogar", (canvas.width / 2) - 100, 200);
+		}
+		
+		function drawDerrota(){
+			ctx.font  = "bold 30px Arial";
+			ctx.strokeStyle = "black";
+    		ctx.lineWidth = 2;
+    		ctx.strokeText("Quebra Bloco - Perdeu", (canvas.width / 2) - 130, 100);
+    		ctx.fillStyle = "white";
+			ctx.fillText("Quebra Bloco - Perdeu", (canvas.width / 2) - 130, 100);
+			
+			ctx.font  = "16px Arial";
+    		ctx.fillStyle = "white";
+			ctx.fillText("Pressione espaço para jogar", (canvas.width / 2) - 100, 200);
+		}
+
 		function drawDificuldade(){
-			ctx.font = "bold 16px Arial"
+			ctx.font = "bold 16px Arial";
+			
 			
 			if(dificuldade == 1){
 				ctx.strokeStyle = "black";
@@ -160,7 +201,7 @@
 							b.status = 0;
 							pontos += 10;
 							if(pontos == (tijoloColumnCount * tijoloRowCount) * 10){
-								alert("Parabéns, você ganhou!");
+								alert("Parabens você ganhou");
 								dificuldade += 1;
 								console.log(dificuldade);
 								document.location.reload();
@@ -283,10 +324,19 @@
 			}
 		}
 
+		
 
 		//Para fazer o movimento do circulo pela tela a cada frame atualizaremos a posição dele no canvas para passar uma 
 		//sensação de movimento.
-		function draw(){
+		function draw(){			
+		if(estado == "menu"){
+			drawMenu();
+			if(spcPressionada){
+				estado = "jogo";
+				spcPressionada = false;
+			}
+		}
+		else if(estado == "jogo"){
 			ctx.clearRect(0, 0, canvas.width, canvas.height) //Usamos essa funcao para limpar o nosso canvas toda vez que ele é
 			//chamado, se não usarmos essa função o nosso circulo deixara todo o seu rastro para tras, os valores que são passados
 			//dentro dele são a area em que ele limpara, como queremos todo o nosso canvas colocamos o ponto de inico em 0,0 e o ponto final no nosso valor maximo de wight e height do canvas. (xTopoEsquerdo, yTopoEsquerdo, xInfDireito, yInfDireito)
@@ -326,6 +376,10 @@
 			}
 			//Adicionamos o dx e dy aos as suas respectivas letras para alterar o valor do eixo x e y do circulo no nosso canvas e
 			//com isso dar a sensação de movimento
+		}
+		else if(estado == "ganhou"){
+			drawVitoria();
+		}
 		}
 
 		if(dificuldade == 1){
