@@ -15,10 +15,9 @@
 	</style>
 </head>
 <body>
-	<canvas id="meuCanvas" width="480" height="320"></canvas> <!-- Criação do canvas, onde todo o jogo estará -->
-
+	<canvas id="breakoutCanvas" width="480" height="320"></canvas> <!-- Criação do canvas, onde todo o jogo estará -->
 	<script>
-		var canvas = document.getElementById("meuCanvas"); //variavel canvas guarda uma referencia do canvas
+		var canvas = document.getElementById("breakoutCanvas"); //variavel canvas guarda uma referencia do canvas
 		var ctx = canvas.getContext("2d"); //Usado para desenhar no canvas
 
 		var x = canvas.width / 2; //Valor de x do arc na funcao draw()
@@ -33,10 +32,8 @@
 
 		var dirPressionada = false;
 		var esqPressionada = false;
-		var shiftEsqPressionada = false;
-		var shiftDirPressionada = false;
+		var shiftPressionada = false;
 		var spcPressionada = false;
-		var spcJaFoiPressionado = false;
 
 		//variveis dos tijolos
 		var tijoloRowCount = 5; //Quantidade de tijolos por linha
@@ -51,7 +48,6 @@
 		var vidas = 0; //Será setada quando soubermos da dificuldade
 		var dificuldade = 3; //Seta a dificuldade do game (1: Facil, 2: Normal, 3: Dificil)
 		var interval;
-		console.log(dificuldade);
 
 		if(dificuldade == 1){
 			batedorWidth = 150;
@@ -180,14 +176,22 @@
 			for(var i = 0; i < tijoloColumnCount; i++){
 				for(var j = 0; j < tijoloRowCount; j++){
 					if(tijolos[i][j].status == 1){
-						var tijoloX = (i*(tijoloWidth + tijoloPadding)) + tijoloOffestLeft;
-						var tijoloY = (j*(tijoloHeight + tijoloPadding)) + tijoloOffsetTop;
+						var tijoloX = ((i*(tijoloWidth + tijoloPadding)) + tijoloOffestLeft);
+						var tijoloY = ((j*(tijoloHeight + tijoloPadding)) + tijoloOffsetTop);
 						tijolos[i][j].x = tijoloX;
 						tijolos[i][j].y = tijoloY;
 						ctx.beginPath();
 						ctx.rect(tijoloX, tijoloY, tijoloWidth, tijoloHeight)
 						ctx.strokeStyle = "black";
-						//ctx.fillStyle = "red";
+						if( dificuldade == 3)
+							ctx.fillStyle = "red";
+						else if(dificuldade == 2)
+							ctx.fillStyle = "yellow"
+						else if(dificuldade == 1) 
+							ctx.fillStyle = "green";
+						else
+							ctx.fillStyle = "white";
+						ctx.fill()
 						ctx.stroke();
 						ctx.closePath();
 					}
@@ -203,8 +207,11 @@
 			else if(e.key == "Left" || e.key == "ArrowLeft"){
 				esqPressionada = true;
 			}
-			else if(e.keyCode == "32"){
+			else if(e.keyCode == "32"){ //32 = space
 				spcPressionada = true;
+			}
+			else if(e.keyCode == "16"){ //16 = shift
+				shiftPressionada = true;
 			}
 		}
 
@@ -215,6 +222,9 @@
 			}
 			else if(e.key == "Left" || e.key == "ArrowLeft"){
 				esqPressionada = false;
+			}
+			else if(e.keyCode == "16"){
+				shiftPressionada = true;
 			}
 			//Nao colocamos o keyup do space senao o jogo iria travar a bolinha e por enquanto nao encontrei uma outra forma para
 			//nao fazer a bolinha parar.
@@ -250,7 +260,7 @@
 				else{
 					vidas--;
 					if(!vidas){
-						raioCirculo = 10;
+						
 						alert("Você perdeu");
 						document.location.reload();
 						clearInterval(interval); //Necessario para o chrome encerrar o jogo	
